@@ -2,6 +2,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import pandas as pd
 import time
+"""
+author: Lautaro Galantini
+
+Auntomatizacion para carga de información de cv en el portal "hiringroom"
+"""
+
+SHEETS = ['personal information','languages']
 
 XPATH_PERSONAL_INFORMATION = [
     '//*[@id="txtNome"]',
@@ -30,25 +37,26 @@ def insert(xpath_list:list, user_data:list):
         try:
             driver.find_element(by=By.XPATH, value= xpath_list[i]).send_keys(str(user_data[i]))
             #time.sleep(1)
-            print(f'Possition {xpath_list[i]} sussesfuly ---> data type {type(user_data[i])}')
+            #print(f'Possition {xpath_list[i]} sussesfuly ---> data type {type(user_data[i])}')
         except:
             print(f'failed{xpath_list[i]}, for data {user_data[i]}---> data type {type(user_data[i])}')
+
+
 def get_cv_data(sheet:str):
     data=[]
     cv_info = pd.read_excel("cv_data.ods", engine="odf", sheet_name=sheet)
     da =cv_info.head()
     #print(da)
     for i, d in da.items():
-        print(f'series of da.item {d}')
         data.append(d[0])
-        print(f'section 0 of series of da.item {d[0]}')
     return data
 
 if __name__ == '__main__':
-    #page = 'https://hiringroom.com/jobs/get_vacancy/624efc869a926355a29df9f6/candidates/new?source=linkedinjobs'
-    #chromeDriver = 'webDriver/chromedriver'
-    #driver = webdriver.Chrome(chromeDriver)
-    #driver.get(page)
-    personal_info = get_cv_data('Idiomas')
-    #insert(personal_info)
-    
+    page = 'https://hiringroom.com/jobs/get_vacancy/624efc869a926355a29df9f6/candidates/new?source=linkedinjobs'
+    chromeDriver = 'webDriver/chromedriver'
+    driver = webdriver.Chrome(chromeDriver)
+    driver.get(page)
+    xpath = [XPATH_PERSONAL_INFORMATION, XPATH_LEGUAGES]
+    for i in range(len(SHEETS)):
+        personal_info = get_cv_data(SHEETS[i])
+        insert(xpath[i],personal_info)

@@ -1,3 +1,4 @@
+from distutils.log import error
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import pandas as pd
@@ -11,7 +12,7 @@ Auntomatizacion para carga de información de cv en el portal "hiringroom"
 SHEETS = ['personal information','languages']
 
 XPATH_PERSONAL_INFORMATION = [
-    '//*[@id="txtNome"]',
+    '/html/body/div[1]/section/div/div[3]/form/div[1]/div/div[2]/div[2]/div/div[1]/div/input',
     '//*[@id="txtSobreNome"]',
     '//*[@id="txtEmail"]',
     '//*[@id="select_postul_country"]',
@@ -25,21 +26,34 @@ XPATH_PERSONAL_INFORMATION = [
     '//*[@id="birthdayPicker"]/fieldset/select[3]',
     '//*[@id="generoPostulante_h"]'
 ]
-'//*[@id="language_fields"]/div/div[2]/div/a/span'
 XPATH_LEGUAGES = [
-    '//*[@id="language_fields"]/div/div[1]/div/div[2]/div/select',
-    '//*[@id="language_fields"]/div/div[1]/div/div[3]/div/select',
-    '//*[@id="language_fields"]/div/div[1]/div/div[4]/div/select'
+    '/html/body/div[1]/section/div/div[3]/form/div[2]/div/div[2]/div/div/div[1]/div/div[2]/div/select',
+    '/html/body/div[1]/section/div/div[3]/form/div[2]/div/div[2]/div/div/div[1]/div/div[3]/div/select',
+    '/html/body/div[1]/section/div/div[3]/form/div[2]/div/div[2]/div/div/div[1]/div/div[4]/div/select'
 ]
 
 def insert(xpath_list:list, user_data:list):
-    for i in range(len(xpath_list)):
+    # click to deploy
+    if xpath_list == XPATH_LEGUAGES:
         try:
-            driver.find_element(by=By.XPATH, value= xpath_list[i]).send_keys(str(user_data[i]))
-            #time.sleep(1)
-            #print(f'Possition {xpath_list[i]} sussesfuly ---> data type {type(user_data[i])}')
+        # languague
+            driver.find_element(by=By.XPATH, value='/html/body/div[1]/section/div/div[3]/form/div[2]/div/div[2]/div/div/div[2]/div/a/span').click()
         except:
-            print(f'failed{xpath_list[i]}, for data {user_data[i]}---> data type {type(user_data[i])}')
+            print(f'cant press button language')
+#    elif xpath_list == XPATH_WORK_EXPERIENCE:
+#        try:
+           # work experience
+#           driver.find_element(by=By.XPATH, value='/html/body/div[1]/section/div/div[3]/form/div[3]/div/div[2]/div[5]/div/div[2]/div/a/span').click()
+#        except:
+#            print(f'cant press button')
+
+    for xp, ud in zip(xpath_list,user_data):
+        try:
+            driver.find_element(by=By.XPATH, value=xp).send_keys(str(ud))
+            time.sleep(0.2)
+            #print(f'Possition {xp} sussesfuly ---> data {ud}')
+        except:
+            print(f'failed{xp}, for data {ud}---> data type {type(ud)}')
 
 
 def get_cv_data(sheet:str):
@@ -56,7 +70,10 @@ if __name__ == '__main__':
     chromeDriver = 'webDriver/chromedriver'
     driver = webdriver.Chrome(chromeDriver)
     driver.get(page)
+    time.sleep(2)
+    print('wainting 2 seconds')
     xpath = [XPATH_PERSONAL_INFORMATION, XPATH_LEGUAGES]
     for i in range(len(SHEETS)):
         personal_info = get_cv_data(SHEETS[i])
+        print(f'data table {personal_info}')
         insert(xpath[i],personal_info)
